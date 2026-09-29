@@ -35,6 +35,11 @@ def load_clients_from_json(filename: str | Path) -> list[dict]:
     return load_records(filename)
 
 
+def load_products_from_json(filename: str | Path) -> list[dict]:
+    """Загружает товары."""
+    return load_records(filename)
+
+
 def save_orders_to_json(filename: str | Path, orders: list[dict]) -> None:
     """Сохраняет заказы."""
     save_records(filename, orders)
@@ -43,3 +48,8 @@ def save_orders_to_json(filename: str | Path, orders: list[dict]) -> None:
 def save_clients_to_json(filename: str | Path, clients: list[dict]) -> None:
     """Сохраняет клиентов."""
     save_records(filename, clients)
+
+
+def save_products_to_json(filename: str | Path, products: list[dict]) -> None:
+    """Сохраняет товары."""
+    save_records(filename, products)

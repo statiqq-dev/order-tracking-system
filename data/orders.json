@@ -2,16 +2,14 @@
     {
         "id": 1,
         "client_id": 1,
-        "product_name": "Клавиатура",
-        "price": 3500.0,
+        "product_id": 1,
         "quantity": 2,
         "is_ready": false
     },
     {
         "id": 2,
         "client_id": 1,
-        "product_name": "Телевизор",
-        "price": 10000.0,
+        "product_id": 2,
         "quantity": 2,
         "is_ready": false
     }
