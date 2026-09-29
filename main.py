@@ -2,14 +2,15 @@
 
 from pathlib import Path
 
-from clients import add_client, delete_client, find_clients
+from clients import Client, add_client, delete_client, find_clients
 from orders import (
-    add_order, calculate_order_price, change_order_status, delete_order,
+    Order, add_order, change_order_status, delete_order,
     filter_orders_by_status, find_orders, find_orders_by_client,
-    get_order_statistics, get_order_status, sort_orders,
+    get_order_statistics, sort_orders,
 )
 from products import (
-    add_product, delete_product, find_product, find_products, update_product,
+    Product, add_product, delete_product, find_product, find_products,
+    update_product,
 )
 from storage import (
     load_clients_from_json, load_orders_from_json, load_products_from_json,
@@ -42,41 +43,28 @@ MENU = '''
 '''
 
 
-def show_orders(
-    orders: list[dict], clients: list[dict], products: list[dict],
-) -> None:
+def show_orders(orders: list[Order]) -> None:
     """Показывает заказы с именем клиента, суммой и статусом."""
     if not orders:
         print('Заказов нет.')
-    names = {client['id']: client['name'] for client in clients}
-    products_by_id = {product['id']: product for product in products}
     for order in orders:
-        product = products_by_id[order['product_id']]
-        total = calculate_order_price(product['price'], order['quantity'])
-        client_name = names.get(order['client_id'], 'Неизвестный клиент')
-        print(f"Заказ ID: {order['id']}, "
-              f"Клиент: {client_name}, "
-              f"Товар: {product['name']}, "
-              f"Количество: {order['quantity']}, Сумма: {total:.2f}, "
-              f"Статус: {get_order_status(order['is_ready'])}")
+        print(order)
 
 
-def show_clients(clients: list[dict]) -> None:
+def show_clients(clients: list[Client]) -> None:
     """Показывает клиентов в соответствии со схемой JSON."""
     if not clients:
         print('Клиентов нет.')
     for client in clients:
-        print(f"Клиент ID: {client['id']}, Имя: {client['name']}, "
-              f"Телефон: {client['phone']}")
+        print(client)
 
 
-def show_products(products: list[dict]) -> None:
+def show_products(products: list[Product]) -> None:
     """Показывает товары в соответствии со схемой JSON."""
     if not products:
         print('Товаров нет.')
     for product in products:
-        print(f"Товар ID: {product['id']}, Название: {product['name']}, "
-              f"Цена: {product['price']:.2f}")
+        print(product)
 
 
 def input_status() -> bool:
@@ -88,17 +76,16 @@ def input_status() -> bool:
 
 
 def execute_action(
-    answer: str, orders: list[dict], clients: list[dict],
-    products: list[dict],
+    answer: str, orders: list[Order], clients: list[Client],
+    products: list[Product],
 ) -> None:
     """Выполняет один пункт меню над переданными коллекциями."""
     match answer:
         case '1':
-            show_orders(orders, clients, products)
+            show_orders(orders)
         case '2':
             client_id = input_int('ID клиента: ')
-            show_orders(find_orders_by_client(orders, client_id), clients,
-                        products)
+            show_orders(find_orders_by_client(orders, client_id))
         case '3':
             client_id = input_int('ID клиента: ')
             product_id = input_int('ID товара: ')
@@ -117,21 +104,17 @@ def execute_action(
         case '8':
             delete_client(clients, input_int('ID клиента: '), orders)
         case '9':
-            show_orders(find_orders(orders, products,
-                                    input('Название товара: ')),
-                        clients, products)
+            show_orders(find_orders(orders, input('Название товара: ')))
         case '10':
-            show_orders(list(filter_orders_by_status(orders, input_status())),
-                        clients, products)
+            show_orders(list(filter_orders_by_status(orders, input_status())))
         case '11':
             key = input('Поле (total, product_name, id): ').strip()
             direction = input('Порядок (1 - возрастание, 2 - убывание): ')
             if direction not in ('1', '2'):
                 raise ValueError('Порядок должен быть 1 или 2.')
-            show_orders(sort_orders(orders, products, key, direction == '2'),
-                        clients, products)
+            show_orders(sort_orders(orders, key, direction == '2'))
         case '12':
-            stats = get_order_statistics(orders, products)
+            stats = get_order_statistics(orders)
             print(f"Всего: {stats['total']}; готовы: {stats['ready']}; "
                   f"в обработке: {stats['processing']}; "
                   f"клиентов с заказами: {stats['clients']}; "
@@ -164,8 +147,8 @@ def main(data_dir: Path = DATA_DIR) -> None:
     products_path = data_dir / 'products.json'
     try:
         clients = load_clients_from_json(clients_path)
-        orders = load_orders_from_json(orders_path)
         products = load_products_from_json(products_path)
+        orders = load_orders_from_json(orders_path, clients, products)
     except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
         print(f'Ошибка загрузки данных: {error}')
         print('Исправьте JSON-файлы и перезапустите программу.')
