@@ -1,0 +1,52 @@
+"""Проверки страниц Django-приложения."""
+
+import os
+
+import django
+from django.test import Client, override_settings
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'order_tracking.settings')
+django.setup()
+
+
+def test_main_pages():
+    client = Client()
+
+    response = client.get('/')
+    assert response.status_code == 200
+    assert 'Система учета заказов' in response.content.decode()
+
+    response = client.get('/products/')
+    assert response.status_code == 200
+    assert 'Клавиатура' in response.content.decode()
+
+    response = client.get('/orders/')
+    assert response.status_code == 200
+    assert 'Заказ №1' in response.content.decode()
+
+
+def test_detail_pages():
+    client = Client()
+
+    response = client.get('/products/1/')
+    assert response.status_code == 200
+    assert '3500.00 руб.' in response.content.decode()
+
+    response = client.get('/orders/1/')
+    assert response.status_code == 200
+    text = response.content.decode()
+    assert 'Иван Иванов' in text
+    assert '7000.00 руб.' in text
+
+
+def test_unknown_objects_return_404():
+    client = Client()
+    assert client.get('/products/999/').status_code == 404
+    assert client.get('/orders/999/').status_code == 404
+
+
+@override_settings(DEBUG=False)
+def test_custom_404_page():
+    response = Client().get('/nonexistent/')
+    assert response.status_code == 404
+    assert 'страница не найдена' in response.content.decode()
