@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from clients import Client, find_client
-from products import Product, find_product
-from utils import generate_id
+from .clients import Client, find_client
+from .common import generate_id
+from .products import Product, find_product
 
 
 class Order:

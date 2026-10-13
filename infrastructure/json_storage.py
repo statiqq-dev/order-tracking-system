@@ -3,9 +3,9 @@
 import json
 from pathlib import Path
 
-from clients import Client, find_client
-from orders import Order
-from products import Product, find_product
+from domain.clients import Client, find_client
+from domain.orders import Order
+from domain.products import Product, find_product
 
 
 def load_records(filename: str | Path) -> list[dict]:

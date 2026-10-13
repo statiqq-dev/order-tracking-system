@@ -4,15 +4,15 @@ import json
 
 import pytest
 
-from clients import Client, add_client, delete_client, find_clients
-from orders import (
+from domain.clients import Client, add_client, delete_client, find_clients
+from domain.orders import (
     Order, add_order, calculate_order_price, change_order_status,
     filter_orders_by_status, find_orders, get_order_statistics, sort_orders,
 )
-from products import (
+from domain.products import (
     Product, add_product, delete_product, update_product,
 )
-from storage import (
+from infrastructure.json_storage import (
     load_clients_from_json, load_orders_from_json, load_products_from_json,
     save_clients_to_json, save_orders_to_json, save_products_to_json,
 )

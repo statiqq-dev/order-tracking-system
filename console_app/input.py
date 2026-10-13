@@ -1,20 +1,4 @@
-"""Проверка данных и безопасный ввод из консоли."""
-
-from collections.abc import Sequence
-from typing import Protocol
-
-
-class HasId(Protocol):
-    """Объект с целочисленным идентификатором."""
-
-    id: int
-
-
-def generate_id(records: Sequence[HasId]) -> int:
-    """Возвращает ID, не занятый в текущей коллекции."""
-    if not records:
-        return 1
-    return max(record.id for record in records) + 1
+"""Ввод и проверка значений для консольного интерфейса."""
 
 
 def input_int(message: str) -> int:

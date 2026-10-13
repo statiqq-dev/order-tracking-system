@@ -34,6 +34,21 @@
 Заказ связывает существующего клиента с товаром. Он хранит количество товара и
 статус готовности. Полная стоимость рассчитывается по цене товара и количеству.
 
+## Архитектура
+
+Код разделён по ответственности:
+
+- `domain/` — предметные сущности и операции над ними;
+- `infrastructure/` — техническая работа с JSON;
+- `console_app/` — консольное меню и ввод;
+- `order_tracking/` — конфигурация и общие элементы Django-сайта;
+- `homepage/`, `product_pages/`, `web_orders/` — отдельные части веб-интерфейса;
+- `data/` — данные;
+- `tests/` — автоматические проверки.
+
+Зависимости направлены от интерфейсов к предметной области: консоль и Django
+используют `domain`, а загрузка JSON изолирована в `infrastructure`.
+
 ## Объектная модель
 
 ### Client
@@ -72,7 +87,7 @@ HTTP 404.
 
 ## View-функции
 
-- `homepage.views.page()` формирует общий HTML-каркас, подключает Bootstrap и
+- `order_tracking.html.page()` формирует общий HTML-каркас, подключает Bootstrap и
   добавляет навигацию;
 - `homepage.views.index()` формирует главную страницу;
 - `homepage.views.page_not_found()` формирует общую страницу ошибки 404;
@@ -100,15 +115,21 @@ HTTP 404.
 order-tracking-system/
 ├── manage.py
 ├── main.py
-├── clients.py
-├── products.py
-├── orders.py
-├── storage.py
-├── utils.py
 ├── requirements.txt
+├── domain/
+│   ├── clients.py
+│   ├── products.py
+│   ├── orders.py
+│   └── common.py
+├── infrastructure/
+│   └── json_storage.py
+├── console_app/
+│   ├── input.py
+│   └── menu.py
 ├── order_tracking/
 │   ├── settings.py
 │   ├── urls.py
+│   ├── html.py
 │   ├── asgi.py
 │   └── wsgi.py
 ├── homepage/
@@ -129,8 +150,8 @@ order-tracking-system/
     └── test_web.py
 ```
 
-Названия `product_pages` и `web_orders` отделяют Django-приложения от модулей
-предметной модели `products.py` и `orders.py`.
+`main.py` оставлен короткой точкой запуска консольной версии. Он передаёт
+управление в `console_app.menu`, поэтому корень проекта не содержит бизнес-логики.
 
 ## Установка и запуск веб-версии
 

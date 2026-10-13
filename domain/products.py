@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from utils import generate_id
+from .common import generate_id
 
 if TYPE_CHECKING:
-    from orders import Order
+    from .orders import Order
 
 
 class Product:

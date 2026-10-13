@@ -1,31 +1,8 @@
-"""Главная страница и общий HTML-каркас."""
+"""Главная страница и обработчик ошибки 404."""
 
 from django.http import HttpResponse
 
-
-def page(title: str, content: str) -> str:
-    """Возвращает общий HTML-каркас страницы."""
-    bootstrap = (
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/'
-        'dist/css/bootstrap.min.css'
-    )
-    return f'''<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{title}</title>
-    <link rel="stylesheet" href="{bootstrap}">
-</head>
-<body>
-    <nav class="nav border-bottom mb-4">
-        <a class="nav-link" href="/">Главная</a>
-        <a class="nav-link" href="/products/">Товары</a>
-        <a class="nav-link" href="/orders/">Заказы</a>
-    </nav>
-    <main class="container pb-4">{content}</main>
-</body>
-</html>'''
+from order_tracking.html import page
 
 
 def index(request):

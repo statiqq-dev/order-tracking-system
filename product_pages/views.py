@@ -4,9 +4,9 @@ from pathlib import Path
 
 from django.http import HttpResponse
 
-from homepage.views import page
-from products import find_product
-from storage import load_products_from_json
+from domain.products import find_product
+from infrastructure.json_storage import load_products_from_json
+from order_tracking.html import page
 
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
 

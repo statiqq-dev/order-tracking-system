@@ -4,13 +4,13 @@ from pathlib import Path
 
 from django.http import HttpResponse
 
-from homepage.views import page
-from orders import find_order_by_id
-from storage import (
+from domain.orders import find_order_by_id
+from infrastructure.json_storage import (
     load_clients_from_json,
     load_orders_from_json,
     load_products_from_json,
 )
+from order_tracking.html import page
 
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
 
