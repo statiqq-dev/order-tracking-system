@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if order %}
+        Заказ №{{ order.id }} - Система учета заказов
+    {% else %}
+        Заказ не найден - Система учета заказов
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if order %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title h3">
+                    Заказ №{{ order.id }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>Клиент:</strong>
+                    {{ order.client.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Товар:</strong>
+                    <a href="{% url 'products:detail' order.product.id %}">
+                        {{ order.product.name }}
+                    </a>
+                </p>
+
+                <p class="card-text">
+                    <strong>Количество:</strong>
+                    {{ order.quantity }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Сумма:</strong>
+                    {{ order.calculate_total|floatformat:"2u" }} руб.
+                </p>
+
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% include "web_orders/includes/order_status.html" %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Заказ не найден
+        </h1>
+        <p>
+            Заказ с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="{% url 'orders:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к списку заказов
+    </a>
+{% endblock %}

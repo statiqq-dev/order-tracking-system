@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Заказы - Система учета заказов
+{% endblock %}
+
+{% block content %}
+    <h1>Заказы</h1>
+
+    <p>
+        Всего заказов: {{ orders|length }}
+    </p>
+
+    <ul class="list-group">
+        {% for order in orders %}
+            <li class="list-group-item d-flex justify-content-between">
+                <a href="{% url 'orders:detail' order.id %}">
+                    Заказ №{{ order.id }}: {{ order.product.name }}
+                    ({{ order.client.name }})
+                </a>
+                {% include "web_orders/includes/order_status.html" %}
+            </li>
+        {% empty %}
+            <li class="list-group-item">
+                Заказы не найдены.
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

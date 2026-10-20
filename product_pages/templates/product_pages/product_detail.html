@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if product %}
+        {{ product.name }} - Система учета заказов
+    {% else %}
+        Товар не найден - Система учета заказов
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if product %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title h3">
+                    {{ product.name }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>ID:</strong> {{ product.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Цена:</strong>
+                    {{ product.price|floatformat:"2u" }} руб.
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Товар не найден
+        </h1>
+        <p>
+            Товар с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="{% url 'products:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к списку товаров
+    </a>
+{% endblock %}

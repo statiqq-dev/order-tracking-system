@@ -50,3 +50,18 @@ def test_custom_404_page():
     response = Client().get('/nonexistent/')
     assert response.status_code == 404
     assert 'страница не найдена' in response.content.decode()
+
+
+def test_pages_use_base_template_and_static_files():
+    text = Client().get('/products/').content.decode()
+    assert 'Всего товаров:' in text
+    assert '/static/homepage/css/style.css' in text
+    assert '/static/homepage/js/main.js' in text
+    assert '/static/homepage/img/logo.png' in text
+    assert 'href="/products/1/"' in text
+
+
+def test_order_status_is_rendered_by_include():
+    text = Client().get('/orders/1/').content.decode()
+    assert 'order-status-processing' in text
+    assert 'Заказ находится в обработке' in text

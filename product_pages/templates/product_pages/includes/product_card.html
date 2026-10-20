@@ -1,0 +1,18 @@
+<article class="card product-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title h5">
+            {{ product.name|default:"Без названия" }}
+        </h2>
+
+        <p class="card-text">
+            Цена: {{ product.price|floatformat:"2u" }} руб.
+        </p>
+
+        <a
+            href="{% url 'products:detail' product.id %}"
+            class="btn btn-primary"
+        >
+            Подробнее
+        </a>
+    </div>
+</article>

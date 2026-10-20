@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Товары - Система учета заказов
+{% endblock %}
+
+{% block content %}
+    <h1>Товары</h1>
+
+    <p>
+        Всего товаров: {{ products|length }}
+    </p>
+
+    {% for product in products %}
+        {% include "product_pages/includes/product_card.html" %}
+    {% empty %}
+        <p>Товары не найдены.</p>
+    {% endfor %}
+{% endblock %}

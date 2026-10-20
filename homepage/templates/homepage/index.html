@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Главная - Система учета заказов
+{% endblock %}
+
+{% block content %}
+    <h1 class="display-4">Система учета заказов</h1>
+    <p class="lead">Веб-интерфейс для просмотра товаров и заказов.</p>
+    <p>Основные разделы:</p>
+    <a href="{% url 'products:list' %}" class="btn btn-primary me-2">Товары</a>
+    <a href="{% url 'orders:list' %}" class="btn btn-secondary">Заказы</a>
+{% endblock %}
