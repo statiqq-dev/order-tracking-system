@@ -1,12 +1,6 @@
 """Проверки страниц Django-приложения."""
 
-import os
-
-import django
 from django.test import Client, override_settings
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'order_tracking.settings')
-django.setup()
 
 
 def test_main_pages():

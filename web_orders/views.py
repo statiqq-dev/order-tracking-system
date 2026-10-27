@@ -1,113 +1,116 @@
 """Страницы заказов: список, отдельный заказ и статистика."""
 
-from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.db.models import Avg, Count, F, Max, Min, Q, Sum
+from django.shortcuts import get_object_or_404, render
 
-from db.database import fetch_all, fetch_one
+from product_pages.models import Product
+
+from .models import Client, Order
 
 # Сколько заказов нужно, чтобы клиент считался постоянным.
 REGULAR_CLIENT_ORDERS = 3
+ORDERS_PER_PAGE = 3
+
+# Сумма заказа: количество, умноженное на цену связанного товара.
+ORDER_TOTAL = F('quantity') * F('product__price')
+
+# Допустимые значения параметра sort и соответствующие поля модели.
+SORT_FIELDS = {
+    'id': 'id',
+    'client': 'client__name',
+    'product': 'product__name',
+    'total': '-total',
+}
 
 
 def orders(request):
-    """Показывает заказы вместе с клиентом, товаром и суммой."""
-    orders_list = fetch_all('''
-        SELECT
-            orders.id,
-            orders.quantity,
-            orders.is_ready,
-            clients.name AS client_name,
-            products.name AS product_name,
-            orders.quantity * products.price AS total
-        FROM orders
-        JOIN clients ON orders.client_id = clients.id
-        JOIN products ON orders.product_id = products.id
-        ORDER BY orders.id
-    ''')
+    """Показывает заказы с поиском, фильтрами, сортировкой и страницами."""
+    query = request.GET.get('q', '').strip()
+    client_id = request.GET.get('client', '')
+    status = request.GET.get('status', '')
+    sort = request.GET.get('sort', 'id')
+
+    orders_list = Order.objects.annotate(total=ORDER_TOTAL)
+
+    if query:
+        orders_list = orders_list.filter(
+            Q(client__name__icontains=query)
+            | Q(product__name__icontains=query)
+        )
+    if client_id.isdigit():
+        orders_list = orders_list.filter(client_id=int(client_id))
+    if status == 'ready':
+        orders_list = orders_list.filter(is_ready=True)
+    elif status == 'processing':
+        orders_list = orders_list.exclude(is_ready=True)
+
+    orders_list = orders_list.order_by(
+        SORT_FIELDS.get(sort, 'id'), 'id',
+    ).values(
+        'id', 'is_ready', 'total',
+        client_name=F('client__name'),
+        product_name=F('product__name'),
+    )
+
+    page_obj = Paginator(orders_list, ORDERS_PER_PAGE).get_page(
+        request.GET.get('page'),
+    )
 
     context = {
-        'orders': orders_list,
+        'orders': page_obj,
+        'page_obj': page_obj,
+        'clients': Client.objects.all(),
+        'query': query,
+        'selected_client': client_id,
+        'status': status,
+        'sort': sort,
     }
 
     return render(request, 'web_orders/order_list.html', context)
 
 
 def order_detail(request, order_id):
-    """Показывает заказ или страницу с кодом 404."""
-    order = fetch_one('''
-        SELECT
-            orders.id,
-            orders.quantity,
-            orders.is_ready,
-            clients.name AS client_name,
-            clients.phone AS client_phone,
-            products.id AS product_id,
-            products.name AS product_name,
-            orders.quantity * products.price AS total
-        FROM orders
-        JOIN clients ON orders.client_id = clients.id
-        JOIN products ON orders.product_id = products.id
-        WHERE orders.id = ?
-    ''', [order_id])
+    """Показывает заказ с клиентом и товаром или страницу с кодом 404."""
+    order = get_object_or_404(
+        Order.objects.select_related('client', 'product')
+        .annotate(total=ORDER_TOTAL),
+        pk=order_id,
+    )
 
     context = {
         'order': order,
     }
 
-    return render(
-        request,
-        'web_orders/order_detail.html',
-        context,
-        status=404 if order is None else 200,
-    )
+    return render(request, 'web_orders/order_detail.html', context)
 
 
 def statistics(request):
     """Показывает сводку, статистику по клиентам и товарам."""
-    summary = fetch_one('''
-        SELECT
-            COUNT(*) AS orders_count,
-            SUM(orders.is_ready) AS ready_count,
-            SUM(orders.quantity * products.price) AS total_amount
-        FROM orders
-        JOIN products ON orders.product_id = products.id
-    ''')
-    prices = fetch_one('''
-        SELECT
-            MIN(price) AS min_price,
-            AVG(price) AS avg_price,
-            MAX(price) AS max_price
-        FROM products
-    ''')
-    clients = fetch_all('''
-        SELECT
-            clients.name AS client_name,
-            COUNT(orders.id) AS orders_count,
-            COALESCE(SUM(orders.quantity * products.price), 0) AS total_amount
-        FROM clients
-        LEFT JOIN orders ON orders.client_id = clients.id
-        LEFT JOIN products ON orders.product_id = products.id
-        GROUP BY clients.id, clients.name
-        ORDER BY total_amount DESC
-    ''')
-    products = fetch_all('''
-        SELECT
-            products.name AS product_name,
-            COALESCE(SUM(orders.quantity), 0) AS quantity_sum
-        FROM products
-        LEFT JOIN orders ON orders.product_id = products.id
-        GROUP BY products.id, products.name
-        ORDER BY quantity_sum DESC
-    ''')
-    regular_clients = fetch_all('''
-        SELECT
-            clients.name AS client_name,
-            COUNT(orders.id) AS orders_count
-        FROM clients
-        JOIN orders ON orders.client_id = clients.id
-        GROUP BY clients.id, clients.name
-        HAVING COUNT(orders.id) >= ?
-        ORDER BY orders_count DESC
-    ''', [REGULAR_CLIENT_ORDERS])
+    summary = Order.objects.aggregate(
+        orders_count=Count('id'),
+        ready_count=Count('id', filter=Q(is_ready=True)),
+        total_amount=Sum(ORDER_TOTAL, default=0),
+    )
+    prices = Product.objects.aggregate(
+        min_price=Min('price'),
+        avg_price=Avg('price'),
+        max_price=Max('price'),
+    )
+    # Запрос строится от Client, поэтому клиенты без заказов тоже попадают
+    # в результат (аналог LEFT JOIN) со значением 0.
+    clients = Client.objects.annotate(
+        orders_count=Count('orders'),
+        total_amount=Sum(
+            F('orders__quantity') * F('orders__product__price'), default=0,
+        ),
+    ).order_by('-total_amount')
+    products = Product.objects.annotate(
+        quantity_sum=Sum('orders__quantity', default=0),
+    ).order_by('-quantity_sum')
+    regular_clients = clients.filter(
+        orders_count__gte=REGULAR_CLIENT_ORDERS,
+    ).order_by('-orders_count')
 
     context = {
         'summary': summary,

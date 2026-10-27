@@ -52,7 +52,7 @@
         <tbody>
             {% for client in clients %}
                 <tr>
-                    <td>{{ client.client_name }}</td>
+                    <td>{{ client.name }}</td>
                     <td>{{ client.orders_count }}</td>
                     <td>{{ client.total_amount|floatformat:"2u" }}</td>
                 </tr>
@@ -75,7 +75,7 @@
         <tbody>
             {% for product in products %}
                 <tr>
-                    <td>{{ product.product_name }}</td>
+                    <td>{{ product.name }}</td>
                     <td>{{ product.quantity_sum }}</td>
                 </tr>
             {% empty %}
@@ -92,7 +92,7 @@
     <ul class="list-group">
         {% for client in regular_clients %}
             <li class="list-group-item d-flex justify-content-between">
-                {{ client.client_name }}
+                {{ client.name }}
                 <span>Заказов: {{ client.orders_count }}</span>
             </li>
         {% empty %}

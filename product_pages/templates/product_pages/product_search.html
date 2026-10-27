@@ -5,9 +5,17 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Поиск товаров по цене</h1>
+    <h1>Поиск товаров</h1>
 
     <form method="get" class="search-form mb-4">
+        <label for="q" class="form-label">Название содержит:</label>
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ query }}"
+            class="form-control"
+        >
         <label for="max_price" class="form-label">Цена не выше, руб.:</label>
         <input
             type="number"
@@ -21,7 +29,9 @@
         <button type="submit" class="btn btn-primary">Найти</button>
     </form>
 
-    {% if max_price %}
+    {% if error %}
+        <p class="text-danger">{{ error }}</p>
+    {% elif searched %}
         <p>
             Найдено товаров: {{ products|length }}
         </p>
@@ -29,7 +39,7 @@
         {% for product in products %}
             {% include "product_pages/includes/product_card.html" %}
         {% empty %}
-            <p>Товаров не дороже {{ max_price }} руб. нет.</p>
+            <p>Подходящих товаров нет.</p>
         {% endfor %}
     {% endif %}
 

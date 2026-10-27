@@ -1,61 +1,53 @@
-"""Страницы товаров: список, отдельный товар и поиск по цене."""
+"""Страницы товаров: список, отдельный товар и поиск."""
 
-from django.shortcuts import render
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, render
 
-from db.database import fetch_all, fetch_one
+from .models import Product
 
 
 def products(request):
-    """Показывает список товаров из базы данных."""
-    products_list = fetch_all('''
-        SELECT id, name, price
-        FROM products
-        ORDER BY name
-    ''')
-
+    """Показывает список товаров, упорядоченный по названию."""
     context = {
-        'products': products_list,
+        'products': Product.objects.all(),
     }
 
     return render(request, 'product_pages/product_list.html', context)
 
 
 def product_detail(request, product_id):
-    """Показывает товар или страницу с кодом 404."""
-    product = fetch_one('''
-        SELECT id, name, price
-        FROM products
-        WHERE id = ?
-    ''', [product_id])
+    """Показывает товар и его заказы или страницу с кодом 404."""
+    product = get_object_or_404(Product, pk=product_id)
 
     context = {
         'product': product,
+        'orders': product.orders.select_related('client'),
     }
 
-    return render(
-        request,
-        'product_pages/product_detail.html',
-        context,
-        status=404 if product is None else 200,
-    )
+    return render(request, 'product_pages/product_detail.html', context)
 
 
 def product_search(request):
-    """Ищет товары не дороже цены, указанной в форме."""
-    max_price = request.GET.get('max_price', '')
-    products_list = []
+    """Ищет товары по части названия и максимальной цене."""
+    query = request.GET.get('q', '').strip()
+    max_price = request.GET.get('max_price', '').strip()
+    products_list = Product.objects.order_by('price')
+    error = None
 
+    if query:
+        products_list = products_list.filter(name__icontains=query)
     if max_price:
-        products_list = fetch_all('''
-            SELECT id, name, price
-            FROM products
-            WHERE price <= ?
-            ORDER BY price
-        ''', [max_price])
+        try:
+            products_list = products_list.filter(price__lte=max_price)
+        except ValidationError:
+            error = 'Укажите корректную цену.'
 
     context = {
         'products': products_list,
+        'query': query,
         'max_price': max_price,
+        'searched': query or max_price,
+        'error': error,
     }
 
     return render(request, 'product_pages/product_search.html', context)

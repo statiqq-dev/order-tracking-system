@@ -1,17 +1,12 @@
 """Проверки базы данных SQLite и страниц, работающих с ней."""
 
 import json
-import os
 import sqlite3
 
-import django
 from django.test import Client
 
 from db.database import BASE_DIR
 from db.import_json import create_schema, import_data
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'order_tracking.settings')
-django.setup()
 
 
 def count_json(filename):
@@ -37,7 +32,7 @@ def test_product_search_uses_parameter():
 
 def test_product_search_without_results():
     text = Client().get('/products/search/?max_price=1').content.decode()
-    assert 'Товаров не дороже 1 руб. нет.' in text
+    assert 'Подходящих товаров нет.' in text
 
 
 def test_statistics_page():

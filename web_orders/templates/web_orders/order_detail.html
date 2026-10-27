@@ -18,13 +18,13 @@
 
                 <p class="card-text">
                     <strong>Клиент:</strong>
-                    {{ order.client_name }}, тел. {{ order.client_phone }}
+                    {{ order.client.name }}, тел. {{ order.client.phone }}
                 </p>
 
                 <p class="card-text">
                     <strong>Товар:</strong>
                     <a href="{% url 'products:detail' order.product_id %}">
-                        {{ order.product_name }}
+                        {{ order.product.name }}
                     </a>
                 </p>
 
