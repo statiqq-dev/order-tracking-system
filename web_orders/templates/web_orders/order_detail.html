@@ -18,12 +18,12 @@
 
                 <p class="card-text">
                     <strong>Клиент:</strong>
-                    {{ order.client.name }}
+                    {{ order.client.name }}, тел. {{ order.client.phone }}
                 </p>
 
                 <p class="card-text">
                     <strong>Товар:</strong>
-                    <a href="{% url 'products:detail' order.product.id %}">
+                    <a href="{% url 'products:detail' order.product_id %}">
                         {{ order.product.name }}
                     </a>
                 </p>
@@ -35,7 +35,7 @@
 
                 <p class="card-text">
                     <strong>Сумма:</strong>
-                    {{ order.calculate_total|floatformat:"2u" }} руб.
+                    {{ order.total|floatformat:"2u" }} руб.
                 </p>
 
                 <p class="card-text">

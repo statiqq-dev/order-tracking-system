@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Статистика - Система учета заказов
+{% endblock %}
+
+{% block content %}
+    <h1>Статистика заказов</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Всего заказов</p>
+                    <p class="h3">{{ summary.orders_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Готовы к выдаче</p>
+                    <p class="h3">{{ summary.ready_count|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Сумма заказов</p>
+                    <p class="h3">{{ summary.total_amount|default:0|floatformat:"2u" }} руб.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>
+        Цены товаров: от {{ prices.min_price|floatformat:"2u" }}
+        до {{ prices.max_price|floatformat:"2u" }} руб.,
+        в среднем {{ prices.avg_price|floatformat:"2u" }} руб.
+    </p>
+
+    <h2 class="h4 mt-4">Заказы по клиентам</h2>
+    <table class="table table-bordered bg-white">
+        <thead>
+            <tr>
+                <th>Клиент</th>
+                <th>Заказов</th>
+                <th>Сумма, руб.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.orders_count }}</td>
+                    <td>{{ client.total_amount|floatformat:"2u" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Клиенты не найдены.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="h4 mt-4">Заказано единиц товара</h2>
+    <table class="table table-bordered bg-white">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.quantity_sum }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">Товары не найдены.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="h4 mt-4">
+        Постоянные клиенты (от {{ regular_client_orders }} заказов)
+    </h2>
+    <ul class="list-group">
+        {% for client in regular_clients %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ client.name }}
+                <span>Заказов: {{ client.orders_count }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">
+                Постоянных клиентов пока нет.
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

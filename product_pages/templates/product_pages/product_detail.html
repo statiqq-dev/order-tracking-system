@@ -26,6 +26,20 @@
                 </p>
             </div>
         </div>
+
+        <h2 class="h4 mt-4">Заказы с этим товаром</h2>
+        <ul class="list-group">
+            {% for order in orders %}
+                <li class="list-group-item">
+                    <a href="{% url 'orders:detail' order.id %}">
+                        Заказ №{{ order.id }}
+                    </a>
+                    {{ order.client.name }}, {{ order.quantity }} шт.
+                </li>
+            {% empty %}
+                <li class="list-group-item">Заказов пока нет.</li>
+            {% endfor %}
+        </ul>
     {% else %}
         <h1 class="text-danger">
             Товар не найден
