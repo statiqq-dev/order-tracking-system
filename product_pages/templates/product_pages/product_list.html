@@ -11,6 +11,10 @@
         Всего товаров: {{ products|length }}
     </p>
 
+    <a href="{% url 'products:search' %}" class="btn btn-outline-primary mb-3">
+        Найти товар по цене
+    </a>
+
     {% for product in products %}
         {% include "product_pages/includes/product_card.html" %}
     {% empty %}

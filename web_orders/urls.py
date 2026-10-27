@@ -9,4 +9,5 @@ app_name = 'orders'
 urlpatterns = [
     path('', views.orders, name='list'),
     path('<int:order_id>/', views.order_detail, name='detail'),
+    path('statistics/', views.statistics, name='statistics'),
 ]

@@ -1,18 +1,17 @@
-"""Страницы списка товаров и отдельного товара."""
-
-from pathlib import Path
+"""Страницы товаров: список, отдельный товар и поиск по цене."""
 
 from django.shortcuts import render
 
-from domain.products import find_product
-from infrastructure.json_storage import load_products_from_json
-
-DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
+from db.database import fetch_all, fetch_one
 
 
 def products(request):
-    """Показывает список товаров из JSON-файла."""
-    products_list = load_products_from_json(DATA_DIR / 'products.json')
+    """Показывает список товаров из базы данных."""
+    products_list = fetch_all('''
+        SELECT id, name, price
+        FROM products
+        ORDER BY name
+    ''')
 
     context = {
         'products': products_list,
@@ -23,8 +22,11 @@ def products(request):
 
 def product_detail(request, product_id):
     """Показывает товар или страницу с кодом 404."""
-    products_list = load_products_from_json(DATA_DIR / 'products.json')
-    product = find_product(products_list, product_id)
+    product = fetch_one('''
+        SELECT id, name, price
+        FROM products
+        WHERE id = ?
+    ''', [product_id])
 
     context = {
         'product': product,
@@ -36,3 +38,24 @@ def product_detail(request, product_id):
         context,
         status=404 if product is None else 200,
     )
+
+
+def product_search(request):
+    """Ищет товары не дороже цены, указанной в форме."""
+    max_price = request.GET.get('max_price', '')
+    products_list = []
+
+    if max_price:
+        products_list = fetch_all('''
+            SELECT id, name, price
+            FROM products
+            WHERE price <= ?
+            ORDER BY price
+        ''', [max_price])
+
+    context = {
+        'products': products_list,
+        'max_price': max_price,
+    }
+
+    return render(request, 'product_pages/product_search.html', context)

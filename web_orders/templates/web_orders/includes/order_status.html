@@ -1,9 +1,9 @@
 {% if order.is_ready %}
     <span class="badge bg-success order-status order-status-ready">
-        {{ order.get_status }}
+        Заказ готов к выдаче
     </span>
 {% else %}
     <span class="badge bg-warning text-dark order-status order-status-processing">
-        {{ order.get_status }}
+        Заказ находится в обработке
     </span>
 {% endif %}

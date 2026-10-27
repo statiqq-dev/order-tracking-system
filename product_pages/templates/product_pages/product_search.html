@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Поиск товаров - Система учета заказов
+{% endblock %}
+
+{% block content %}
+    <h1>Поиск товаров по цене</h1>
+
+    <form method="get" class="search-form mb-4">
+        <label for="max_price" class="form-label">Цена не выше, руб.:</label>
+        <input
+            type="number"
+            id="max_price"
+            name="max_price"
+            min="0"
+            step="0.01"
+            value="{{ max_price }}"
+            class="form-control"
+        >
+        <button type="submit" class="btn btn-primary">Найти</button>
+    </form>
+
+    {% if max_price %}
+        <p>
+            Найдено товаров: {{ products|length }}
+        </p>
+
+        {% for product in products %}
+            {% include "product_pages/includes/product_card.html" %}
+        {% empty %}
+            <p>Товаров не дороже {{ max_price }} руб. нет.</p>
+        {% endfor %}
+    {% endif %}
+
+    <a
+        href="{% url 'products:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← ко всем товарам
+    </a>
+{% endblock %}

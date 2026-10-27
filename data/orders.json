@@ -12,5 +12,26 @@
         "product_id": 2,
         "quantity": 2,
         "is_ready": false
+    },
+    {
+        "id": 3,
+        "client_id": 2,
+        "product_id": 3,
+        "quantity": 1,
+        "is_ready": true
+    },
+    {
+        "id": 4,
+        "client_id": 2,
+        "product_id": 1,
+        "quantity": 1,
+        "is_ready": false
+    },
+    {
+        "id": 5,
+        "client_id": 1,
+        "product_id": 3,
+        "quantity": 3,
+        "is_ready": true
     }
 ]

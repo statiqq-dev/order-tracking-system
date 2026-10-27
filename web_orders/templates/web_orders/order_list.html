@@ -15,8 +15,8 @@
         {% for order in orders %}
             <li class="list-group-item d-flex justify-content-between">
                 <a href="{% url 'orders:detail' order.id %}">
-                    Заказ №{{ order.id }}: {{ order.product.name }}
-                    ({{ order.client.name }})
+                    Заказ №{{ order.id }}: {{ order.product_name }}
+                    ({{ order.client_name }})
                 </a>
                 {% include "web_orders/includes/order_status.html" %}
             </li>
